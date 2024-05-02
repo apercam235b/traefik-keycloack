@@ -119,6 +119,61 @@ Cuando le indicamos la ip, si fuera necesario, tendriamos que agregarle el puert
 
 ## Keycloak
 
+Ahora vamos a levantar el contendor de keycloak, podemos levantarlo dentro del mismo docker compose de Traefik, pero mi experiencia es mejor hacerlo en un contenedor a parte.
+
+```
+services:
+networks:
+  LAN:
+    external: true
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    dns: #En mi caso las DNS son necesarias por que mis usuarios son importados de un ldap
+      - 192.168.10.11
+      - 172.17.24.5
+      - 8.8.8.8
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8088
+    ports:
+      - 8088:8088
+    networks:
+      - LAN
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.alvaro.civica.lab`)"
+      - "traefik.http.routers.keycloak.entrypoints=pruebas"
+      - "traefik.docker.network=LAN"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8088"
+    volumes:
+      - ./keycloak-db:/opt/keycloak/data/h2
+
+```
+
+Una vez dentro de Keycloak tendremos que iniciar sesion, en este caso el usuario admin y pass admin, que tendremos que cambiar como es logico.
+
+En Keycloak tendremos que crear un client, para ello voy a dejar la configuracion basica y varios datos que vamos a necesitar mas adelante, para saber localizarlos.
+
+### Client
+El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es auth
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/65921c69-f219-495e-99b5-6b16722c49ae)
+
+#### Configuración del Client (auth)
+
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/e366efef-9bd4-40e9-a6f6-04a64b3ed00f)
+
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/10a20393-eb0e-4e4b-9768-8b03f5b2c353)
+
+Importante en el apartado de "Credentials" vamos a necesitar el secret.
+
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/14666cf2-bbb0-48f4-82b9-61c49e85eb3d)
+
+
+
 
 ----------------------------------------
 ----------------------------------------
