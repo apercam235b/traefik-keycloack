@@ -61,6 +61,34 @@ Vamos a indicarle un fichero donde tendremos configuración sobre nuestro traefi
 ```
     
 Es importante crear el fichero y mapearlo con un volumen que tengamos en nuestro equipo
+
+Dentro de este fichero entre otras configuraciones, podemos indicar los entrypoint, asi como el socket de docker, y tambien sera necesario añadir donde se va a ubicar la configuracion dinámica:
+
+```
+## STATIC CONFIGURATION
+log:
+  level: INFO
+
+api:
+  insecure: true
+  dashboard: true
+
+entryPoints:
+  pruebas:
+    address: ":80"
+  pruebas_seguro:
+    address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+  file:
+    directory: "/etc/traefik/"
+```
+
+Lo indicaremos con providers  ->  file  ->  directory  ->  "directorio donde tendremos nuestras configuraciones dinámicas"
+
 #### Dinámica:
 
 
