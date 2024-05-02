@@ -3,11 +3,11 @@ En este post vamos a ver como podemos autenticarnos en aplicaciones a traves de 
 
 Vamos a necesitar 3 contenedores:
 
-Traefik: Proxy donde vamos a configurar el middleware.
-Auth-Forward: Nos hara de intermediramos para la Autenticacion.
-Keycloak: Hara los servicios de autenticacion.
+- Traefik: Proxy donde vamos a configurar el middleware.
+- Auth-Forward: Nos hara de intermediramos para la Autenticacion.
+- Keycloak: Hara los servicios de autenticacion.
 
-----------------------------------------
+
 ## Traefik
 
 Empezamos levantando lo basico de Traefik con el que vamos a ir sumandole cosas para que todo fucione bien al final:
@@ -51,17 +51,17 @@ services:
 ```
 Con esto ya tendriamos montado un contenedor con nuestro traefik fucionando.
 
-----------------------------------------
-### Configuracion Estatica y Dinamica o Configuracion por Socket:
 
+### Configuracion Estatica y Dinamica o Configuracion por Socket:
+---
 Hay dos maneras para que traefik aprenda y pueda gestionar contenedores de docker, a traves de label y que aprenda del propio socket de docker, o mediantes archivos de configuracion, que tenemos dos tipos de configuración.
 
-----------------------------------------
+
 #### Estática:
 Vamos a indicarle un fichero donde tendremos configuración sobre nuestro traefik. Para esta configuracion es necesario pasarle como command la siguiente linea:
     
 ```
-        - "--providers.file.filename=/etc/traefik/traefik.toml" # Configuracion estatica 
+- "--providers.file.filename=/etc/traefik/traefik.toml" # Configuracion estatica 
 ```
     
 Es importante crear el fichero y mapearlo con un volumen que tengamos en nuestro equipo
@@ -93,7 +93,6 @@ providers:
 
 Lo indicaremos con providers  ->  file  ->  directory  ->  "directorio donde tendremos nuestras configuraciones dinámicas"
 
-----------------------------------------
 #### Dinámica:
 
 Para la configuracion dinamica, una buena practica puede ser crear 1 fichero por cada servicio que queremos que nuestro traefik filtre, para ello un ejemplo de como configurar un fichero, en mi caso va a ser un contenedor de uptime-kuma:
@@ -118,7 +117,7 @@ Con esta configuración tendremos nuestro servicio configurado para que sea reco
 
 Cuando le indicamos la ip, si fuera necesario, tendriamos que agregarle el puerto que usaria nuestro contenedor.
 
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/d10e353e-21fa-480f-95ca-7ccf7f2d3242)
+![image](src/images/traefik-uptime.png)
 
 
 ----------------------------------------
@@ -167,18 +166,18 @@ En Keycloak tendremos que crear un client, para ello voy a dejar la configuracio
 ### Client
 
 El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es auth
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/65921c69-f219-495e-99b5-6b16722c49ae)
+![image](src/images/keycloak1.png)
 
 ----------------------------------------
 #### Configuración del Client (auth)
 
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/e366efef-9bd4-40e9-a6f6-04a64b3ed00f)
+![image](src/images/keycloak2.png)
 
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/10a20393-eb0e-4e4b-9768-8b03f5b2c353)
+![image](src/images/keycloak3.png)
 
 Importante en el apartado de "Credentials" vamos a necesitar el secret.
 
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/14666cf2-bbb0-48f4-82b9-61c49e85eb3d)
+![image](src/images/keycloak4.png)
 
 ----------------------------------------
 ### Usuarios
@@ -195,14 +194,14 @@ En este contenedor vamos a tener que aclarar varias configuraciones que van a se
 En las environment que vamos a necesitar son las siguientes:
 
 ```
-            - DEFAULT_PROVIDER=oidc 
-            - PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
-            - PROVIDERS_OIDC_CLIENT_ID=auth 
-            - PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j 
-                # INSECURE_COOKIE is required if not using a https entrypoint 
-            - INSECURE_COOKIE=true 
-            - LOG_LEVEL=debug 
-            - SECRET=dhfbvgsahodgbvsdhsdhfs 
+- DEFAULT_PROVIDER=oidc 
+- PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
+- PROVIDERS_OIDC_CLIENT_ID=auth 
+- PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j 
+  # INSECURE_COOKIE is required if not using a https entrypoint 
+- INSECURE_COOKIE=true 
+- LOG_LEVEL=debug 
+- SECRET=dhfbvgsahodgbvsdhsdhfs 
 ```
 
 Aqui tendremos que modificar los campos segun nuestra configuracion:
@@ -219,47 +218,47 @@ Aqui tendremos que modificar los campos segun nuestra configuracion:
 
 En las labels tambien vamos a tener que agregar o modificar ciertas configuraciones:
 ```
-        labels: 
-            - "traefik.enable=true" 
-            - "traefik.docker.network=LAN"
-            - "traefik.http.services.forwardauth.loadbalancer.server.port=4181" 
-            - "traefik.http.routers.forwardauth.entrypoints=pruebas" 
-            - "traefik.http.routers.forwardauth.rule=Path(`/_oauth`)" 
-            - "traefik.http.routers.forwardauth.middlewares=traefik-forward-auth" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
+labels: 
+  - "traefik.enable=true" 
+  - "traefik.docker.network=LAN"
+  - "traefik.http.services.forwardauth.loadbalancer.server.port=4181" 
+  - "traefik.http.routers.forwardauth.entrypoints=pruebas" 
+  - "traefik.http.routers.forwardauth.rule=Path(`/_oauth`)" 
+  - "traefik.http.routers.forwardauth.middlewares=traefik-forward-auth" 
+  - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
+  - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
+  - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
 ```
 
 Al final el docker compose se nos quedaria de la siguiente forma:
 
 ```
-    forwardauth: 
-        image: thomseddon/traefik-forward-auth:2 
-        container_name: forward-auth 
-        networks: 
-            - LAN 
-        ports: 
-            - 4181:4181 
-        environment: 
-            - DEFAULT_PROVIDER=oidc 
-            - PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
-            - PROVIDERS_OIDC_CLIENT_ID=auth 
-            - PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j 
-                # INSECURE_COOKIE is required if not using a https entrypoint 
-            - INSECURE_COOKIE=true 
-            - LOG_LEVEL=debug 
-            - SECRET=dhfbvgsahodgbvsdhsdhfs 
-        labels: 
-            - "traefik.enable=true" 
-            - "traefik.docker.network=LAN"
-            - "traefik.http.services.forwardauth.loadbalancer.server.port=4181" 
-            - "traefik.http.routers.forwardauth.entrypoints=pruebas" 
-            - "traefik.http.routers.forwardauth.rule=Path(`/_oauth`)" 
-            - "traefik.http.routers.forwardauth.middlewares=traefik-forward-auth" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
-            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
+forwardauth: 
+    image: thomseddon/traefik-forward-auth:2 
+    container_name: forward-auth 
+    networks: 
+        - LAN 
+    ports: 
+        - 4181:4181 
+    environment: 
+        - DEFAULT_PROVIDER=oidc 
+        - PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
+        - PROVIDERS_OIDC_CLIENT_ID=auth 
+        - PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j 
+            # INSECURE_COOKIE is required if not using a https entrypoint 
+        - INSECURE_COOKIE=true 
+        - LOG_LEVEL=debug 
+        - SECRET=dhfbvgsahodgbvsdhsdhfs 
+    labels: 
+        - "traefik.enable=true" 
+        - "traefik.docker.network=LAN"
+        - "traefik.http.services.forwardauth.loadbalancer.server.port=4181" 
+        - "traefik.http.routers.forwardauth.entrypoints=pruebas" 
+        - "traefik.http.routers.forwardauth.rule=Path(`/_oauth`)" 
+        - "traefik.http.routers.forwardauth.middlewares=traefik-forward-auth" 
+        - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
+        - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
+        - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
 
 networks: 
   LAN: 
@@ -269,11 +268,39 @@ networks:
 
 Al iniciar este contenedor nos generara en el traefik un middleware
 
-![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/f2614265-0360-4e1d-b230-245918a24d54)
+![image](src/images/traefik-uptime-middleware.png)
 
 Con esto ya tendriamos configurado todo, nos faltaria indicarle que contenedores van a pasar a traves de este middleware.
 
 ## Configuracion de contenedores para autenticarse
+
+Vamos a usar de ejemplo un contenedor que tenemos de uptime-kuma, aunque serviria cualquiera como ejemplo.
+
+Le podemos agregar una label para el middleware o a traves de los ficheros de configuracion dinamica:
+
+#### Fichero configuración dinámica:
+
+```
+http:
+  routers:
+    uptime-kuma:
+      rule: "Host(`uptime.alvaro.civica.lab`)"
+      service: uptime-kuma
+      priority: 1000
+      entryPoints:
+        - pruebas
+      middlewares: traefik-forward-auth@docker
+```
+El nombre que ponemos del middleware es el que nos proporciona el propio middleware en el traefik.
+
+#### Por labels:
+
+```
+- "traefik.http.routers.uptime-kuma.middlewares=traefik-forward-auth@docker"
+```
+
+Fuente: https://doc.traefik.io/traefik/middlewares/overview/
+
 
 
 ----------------------------------------
