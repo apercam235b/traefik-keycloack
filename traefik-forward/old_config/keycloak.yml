@@ -1,0 +1,14 @@
+http:
+  routers:
+    keycloak:
+      rule: "Host(`keycloak.alvaro.civica.lab`)"
+      service: keycloak
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    keycloak:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:8088"

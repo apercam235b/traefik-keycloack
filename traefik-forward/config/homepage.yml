@@ -1,0 +1,14 @@
+http:
+  routers:
+    homepage:
+      rule: "Host(`homepage.alvaro.civica.lab`)"
+      service: homepage
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    homepage:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:3000"

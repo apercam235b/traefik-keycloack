@@ -1,0 +1,14 @@
+http:
+  routers:
+    wordpress:
+      rule: "Host(`wordpress.alvaro.civica.lab`)"
+      service: wordpress
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    wordpress:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:8081"

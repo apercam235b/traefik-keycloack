@@ -1,0 +1,14 @@
+http:
+  routers:
+    dockge:
+      rule: "Host(`dockge.alvaro.civica.lab`)"
+      service: dockge
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    dockge:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:5001"

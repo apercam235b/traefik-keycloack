@@ -1,0 +1,22 @@
+http:
+  routers:
+    forwardauth:
+      entryPoints:
+        - pruebas
+      rule: "Path(`/_oauth`)"
+      #rule: "Host(`auth.alvaro.civica.lab`)"
+      middlewares: traefik-forward-auth@file
+      service: forwardauth
+
+  middlewares:
+    traefik-forward-auth:
+      forwardauth:
+        address: http://forwardauth:4181
+        authResponseHeaders: X-Forwarded-User
+        trustForwardHeader: true
+
+  services:
+    forwardauth:
+      loadbalancer:
+        servers:
+          url: http://192.168.99.198:4181

@@ -1,0 +1,14 @@
+http:
+  routers:
+    traefik:
+      rule: "Host(`traefik.alvaro.civica.lab`)"
+      service: traefik
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    traefik:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.196:8080"

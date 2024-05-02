@@ -1,0 +1,14 @@
+http:
+  routers:
+    drawio:
+      rule: "Host(`drawio.alvaro.civica.lab`)"
+      service: drawio
+      priority: 1000
+      entryPoints:
+        - pruebas
+
+  services:
+    drawio:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:8080"

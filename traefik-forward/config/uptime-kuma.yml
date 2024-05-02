@@ -1,0 +1,16 @@
+http:
+  routers:
+    uptime-kuma:
+      rule: "Host(`uptime.alvaro.civica.lab`)"
+      service: uptime-kuma
+ #     priority: 1000
+      entryPoints:
+        - pruebas
+      middlewares: traefik-forward-auth@docker
+
+  services:
+    uptime-kuma:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.99.198:3001"
+
