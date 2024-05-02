@@ -162,10 +162,13 @@ networks:
 Una vez dentro de Keycloak tendremos que iniciar sesion, en este caso el usuario admin y pass admin, que tendremos que cambiar como es logico.
 
 En Keycloak tendremos que crear un client, para ello voy a dejar la configuracion basica y varios datos que vamos a necesitar mas adelante, para saber localizarlos.
+
 ----------------------------------------
 ### Client
+
 El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es auth
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/65921c69-f219-495e-99b5-6b16722c49ae)
+
 ----------------------------------------
 #### Configuración del Client (auth)
 
@@ -176,6 +179,7 @@ El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es aut
 Importante en el apartado de "Credentials" vamos a necesitar el secret.
 
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/14666cf2-bbb0-48f4-82b9-61c49e85eb3d)
+
 ----------------------------------------
 ### Usuarios
 
@@ -184,44 +188,50 @@ Yo he importado usuarios con un real fedetarion, pero si no tienes un ldap o ad,
 ----------------------------------------
 ## Forward-Auth
 
+Vamos a usar ForwardAuth como middleware para la autentificacion, para ello vamos a levantar el contenedor y lo configuramos como middleware
 
-----------------------------------------
-----------------------------------------
+En este contenedor vamos a tener que aclarar varias configuraciones que van a ser importantes a la hora de hacer funcionar todo.
+
+En las environment que vamos a necesitar son las siguientes:
 
 ```
-version: "3" 
-services: 
-    traefik: # The official v2 Traefik docker image 
-        container_name: traefik 
-        image: traefik:latest  
-        command: 
-            - "--entryPoints.pruebas.address=:80" 
-            - "--entryPoints.pruebas_seguro.address=:443" 
-            - "--api.insecure=true" 
-            - "--providers.docker" 
-            - "--providers.docker.exposedByDefault=false"
-            - "--providers.file.filename=/etc/traefik/traefik.toml" # Configuracion estatica 
-        # 	- "--providers.file.directory=/etc/traefik/" # Para indicarle la configuración dinamica
-        restart: always 
-        ports: 
-        	- 80:80 # HTTP port 
-        	- 8080:8080 # Dashboard port 
-        	- 443:443 # Https port 
-        volumes: 
-       		# So that Traefik can listen to the Docker events 
-       		- /var/run/docker.sock:/var/run/docker.sock 
-       		- ./config:/etc/traefik/ 
-        networks: 
-            - LAN 
+            - DEFAULT_PROVIDER=oidc 
+            - PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
+            - PROVIDERS_OIDC_CLIENT_ID=auth 
+            - PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j 
+                # INSECURE_COOKIE is required if not using a https entrypoint 
+            - INSECURE_COOKIE=true 
+            - LOG_LEVEL=debug 
+            - SECRET=dhfbvgsahodgbvsdhsdhfs 
+```
+
+Aqui tendremos que modificar los campos segun nuestra configuracion:
+
+  - PROVIDERS_OIDC_ISSUER_URL=http://keycloak.alvaro.civica.lab/realms/prueba 
+    poner la url de nuestro keycloak y al realms donde queremos apuntar, en mi caso es prueba
+  - PROVIDERS_OIDC_CLIENT_ID=auth
+    nombre del client, en mi caso es auth
+  - PROVIDERS_OIDC_CLIENT_SECRET=a3LlxXbhvUjXQMBrj5Ztyo9xNyGzud6j
+    el secret que en credential dentro del client nos proporciona.
+  - SECRET=dhfbvgsahodgbvsdhsdhfs
+    cadena de texto aleatoria para generar los HASH
+
+
+En las labels tambien vamos a tener que agregar o modificar ciertas configuraciones:
+```
         labels: 
-          		- "traefik.enable=true" 
-          		- "traefik.docker.network=LAN" 
-          		- "traefik.http.routers.traefik.rule=Host(`traefik.alvaro.civica.lab`)" 
-          		- "traefik.http.services.traefik.loadbalancer.server.port=8080" 
-          		- "traefik.http.routers.traefik.entrypoints=pruebas" 
-                # Con la siguiente linea hariamos que hiciera falta authenticarse para ver el dashboard de Traefik.       
-                - "traefik.http.routers.traefik.middlewares=traefik-forward-auth@docker"
+            - "traefik.enable=true" 
+            - "traefik.docker.network=LAN"
+            - "traefik.http.services.forwardauth.loadbalancer.server.port=4181" 
+            - "traefik.http.routers.forwardauth.entrypoints=pruebas" 
+            - "traefik.http.routers.forwardauth.rule=Path(`/_oauth`)" 
+            - "traefik.http.routers.forwardauth.middlewares=traefik-forward-auth" 
+            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
+            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
+            - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
 ```
+
+Al final el docker compose se nos quedaria de la siguiente forma:
 
 ```
     forwardauth: 
@@ -250,11 +260,23 @@ services:
             - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://forward-auth:4181" 
             - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User" 
             - "traefik.http.middlewares.traefik-forward-auth.forwardauth.trustForwardHeader=true" 
-            # - traefik.http.routers.keycloak.tls=true 
-            # - traefik.http.routers.keycloak.tls.certresolver=letsencrypt 
 
 networks: 
   LAN: 
     external: true 
 
 ```
+
+Al iniciar este contenedor nos generara en el traefik un middleware
+
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/f2614265-0360-4e1d-b230-245918a24d54)
+
+Con esto ya tendriamos configurado todo, nos faltaria indicarle que contenedores van a pasar a traves de este middleware.
+
+## Configuracion de contenedores para autenticarse
+
+
+----------------------------------------
+----------------------------------------
+
+
