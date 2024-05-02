@@ -55,9 +55,11 @@ Con esto ya tendriamos montado un contenedor con nuestro traefik fucionando.
 Hay dos maneras para que traefik aprenda y pueda gestionar contenedores de docker, a traves de label y que aprenda del propio socket de docker, o mediantes archivos de configuracion, que tenemos dos tipos de configuración.
 Estática:
     Vamos a indicarle un fichero donde tendremos configuración sobre nuestro traefik. Para esta configuracion es necesario pasarle como command la siguiente linea:
+    
     ```
         - "--providers.file.filename=/etc/traefik/traefik.toml" # Configuracion estatica 
     ```
+    
     Es importante crear el fichero y mapearlo con un volumen que tengamos en nuestro equipo
 Dinámica:
 
