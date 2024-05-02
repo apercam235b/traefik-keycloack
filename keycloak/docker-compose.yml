@@ -1,0 +1,34 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    dns:
+      - 192.168.10.11
+      - 172.17.24.5
+      - 8.8.8.8
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8088
+    ports:
+      - 8088:8088
+    networks:
+      - LAN
+    labels:
+      - "homepage.group=Contenedores Docker"
+      - "homepage.name=Keycloak"
+      - "homepage.icon=keycloak.png"
+      - "homepage.href=http://keycloak.alvaro.civica.lab"
+      - "homepage.description=Servicio de Autentificacion"
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.alvaro.civica.lab`)"
+      - "traefik.http.routers.keycloak.entrypoints=pruebas"
+      - "traefik.docker.network=LAN"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8088"
+    volumes:
+      - ./keycloak-db:/opt/keycloak/data/h2
+
+networks:
+  LAN:
+    external: true
