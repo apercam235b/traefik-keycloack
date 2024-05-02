@@ -56,9 +56,9 @@ Hay dos maneras para que traefik aprenda y pueda gestionar contenedores de docke
 Estática:
     Vamos a indicarle un fichero donde tendremos configuración sobre nuestro traefik. Para esta configuracion es necesario pasarle como command la siguiente linea:
     
-    ```
+
         - "--providers.file.filename=/etc/traefik/traefik.toml" # Configuracion estatica 
-    ```
+
     
     Es importante crear el fichero y mapearlo con un volumen que tengamos en nuestro equipo
 Dinámica:
