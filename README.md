@@ -91,7 +91,31 @@ Lo indicaremos con providers  ->  file  ->  directory  ->  "directorio donde ten
 
 #### Dinámica:
 
+Para la configuracion dinamica, una buena practica puede ser crear 1 fichero por cada servicio que queremos que nuestro traefik filtre, para ello un ejemplo de como configurar un fichero, en mi caso va a ser un contenedor de uptime-kuma:
 
+```
+http:
+  routers:
+    uptime-kuma:
+      rule: "Host(`uptime.alvaro.civica.lab`)"
+      service: uptime-kuma
+        priority: 1000
+      entryPoints:
+        - pruebas
+
+services:
+  uptime-kuma:
+    loadBalancer:
+      servers:
+        - url: "http://192.168.99.198:3001"
+```
+Con esta configuración tendremos nuestro servicio configurado para que sea reconocido por traefik.
+
+Cuando le indicamos la ip, si fuera necesario, tendriamos que agregarle el puerto que usaria nuestro contenedor.
+
+
+----------------------------------------
+----------------------------------------
 
 ```
 version: "3" 
