@@ -1,4 +1,4 @@
-# traefik_test
+# Traefik -- Keycloak -- ForwardAuth
 En este post vamos a ver como podemos autenticarnos en aplicaciones a traves de Keycloak usando traefik como middleware
 
 Vamos a necesitar 3 contenedores:
@@ -7,6 +7,7 @@ Traefik: Proxy donde vamos a configurar el middleware.
 Auth-Forward: Nos hara de intermediramos para la Autenticacion.
 Keycloak: Hara los servicios de autenticacion.
 
+----------------------------------------
 ## Traefik
 
 Empezamos levantando lo basico de Traefik con el que vamos a ir sumandole cosas para que todo fucione bien al final:
@@ -50,9 +51,12 @@ services:
 ```
 Con esto ya tendriamos montado un contenedor con nuestro traefik fucionando.
 
+----------------------------------------
 ### Configuracion Estatica y Dinamica o Configuracion por Socket:
 
 Hay dos maneras para que traefik aprenda y pueda gestionar contenedores de docker, a traves de label y que aprenda del propio socket de docker, o mediantes archivos de configuracion, que tenemos dos tipos de configuración.
+
+----------------------------------------
 #### Estática:
 Vamos a indicarle un fichero donde tendremos configuración sobre nuestro traefik. Para esta configuracion es necesario pasarle como command la siguiente linea:
     
@@ -89,6 +93,7 @@ providers:
 
 Lo indicaremos con providers  ->  file  ->  directory  ->  "directorio donde tendremos nuestras configuraciones dinámicas"
 
+----------------------------------------
 #### Dinámica:
 
 Para la configuracion dinamica, una buena practica puede ser crear 1 fichero por cada servicio que queremos que nuestro traefik filtre, para ello un ejemplo de como configurar un fichero, en mi caso va a ser un contenedor de uptime-kuma:
@@ -116,7 +121,7 @@ Cuando le indicamos la ip, si fuera necesario, tendriamos que agregarle el puert
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/d10e353e-21fa-480f-95ca-7ccf7f2d3242)
 
 
-
+----------------------------------------
 ## Keycloak
 
 Ahora vamos a levantar el contendor de keycloak, podemos levantarlo dentro del mismo docker compose de Traefik, pero mi experiencia es mejor hacerlo en un contenedor a parte.
@@ -157,11 +162,11 @@ networks:
 Una vez dentro de Keycloak tendremos que iniciar sesion, en este caso el usuario admin y pass admin, que tendremos que cambiar como es logico.
 
 En Keycloak tendremos que crear un client, para ello voy a dejar la configuracion basica y varios datos que vamos a necesitar mas adelante, para saber localizarlos.
-
+----------------------------------------
 ### Client
 El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es auth
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/65921c69-f219-495e-99b5-6b16722c49ae)
-
+----------------------------------------
 #### Configuración del Client (auth)
 
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/e366efef-9bd4-40e9-a6f6-04a64b3ed00f)
@@ -171,8 +176,13 @@ El nombre que le ponemos va a ser necesario mas adelante, en nuestro caso es aut
 Importante en el apartado de "Credentials" vamos a necesitar el secret.
 
 ![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/14666cf2-bbb0-48f4-82b9-61c49e85eb3d)
+----------------------------------------
+### Usuarios
 
+Yo he importado usuarios con un real fedetarion, pero si no tienes un ldap o ad, crea al menos 1 usuario para realizar las pruebas.
 
+----------------------------------------
+## Forward-Auth
 
 
 ----------------------------------------
