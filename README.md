@@ -113,7 +113,8 @@ Con esta configuración tendremos nuestro servicio configurado para que sea reco
 
 Cuando le indicamos la ip, si fuera necesario, tendriamos que agregarle el puerto que usaria nuestro contenedor.
 
-![Uploading image.png…]()
+![image](https://github.com/apercam235b/traefik-keycloack/assets/146701978/d10e353e-21fa-480f-95ca-7ccf7f2d3242)
+
 
 
 ## Keycloak
