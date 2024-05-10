@@ -157,7 +157,7 @@ networks:
       - ./keycloak-db:/opt/keycloak/data/h2
 
 ```
-
+Nota: Puede que no arranque el servicio, es por que si tenemos keycloak con una base de datos, tendremos que cambiarle los permisos al directorio de la base de datos.
 Una vez dentro de Keycloak tendremos que iniciar sesion, en este caso el usuario admin y pass admin, que tendremos que cambiar como es logico.
 
 En Keycloak tendremos que crear un client, para ello voy a dejar la configuracion basica y varios datos que vamos a necesitar mas adelante, para saber localizarlos.
